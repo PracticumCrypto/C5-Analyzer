@@ -10,6 +10,9 @@ A Tool for Ranking Cryptos
 - [ ] C5 Factor Build
 - [ ] Model Replicate
 - [ ] Ranking Output
+- [ ] switch daily risk free rate to weekly 
+- [ ] Plot cumulative return 
+- [ ] Fill null values
 
 ### Miscellaneous
 
