@@ -6,13 +6,13 @@ A Tool for Ranking Cryptos
 ### Core:
 
 - [x] Data Pull
-- [ ] Data Preprocess
-- [ ] C5 Factor Build
-- [ ] Model Replicate
-- [ ] Ranking Output
-- [ ] switch daily risk free rate to weekly 
-- [ ] Plot cumulative return 
-- [ ] Fill null values
+- [x] Data Preprocess
+- [x] C5 Factor Build
+- [x] Model Replicate
+- [x] Ranking Output
+- [x] switch daily risk free rate to weekly 
+- [x] Plot cumulative return 
+- [x] Fill null values
 
 ### Miscellaneous
 
