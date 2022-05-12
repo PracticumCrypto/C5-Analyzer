@@ -1,3 +1,4 @@
+from logging import Logger
 import pandas as pd
 from . import constants as cons
 
@@ -33,7 +34,8 @@ def PullData(coin: str,
     return data
 
 
-def PullStart(coinList: list):
+def PullStart(coinList: list,
+              logC: Logger):
     """This Method Gets Features(Listed in "endPoints"(Constant)) of Coins(Listed in "coinList"(Method Parameter))
 
     Args:
@@ -45,8 +47,6 @@ def PullStart(coinList: list):
     # Initialization
     from functools import reduce
     from fredapi import Fred
-    from rich.console import Console
-    console = Console()
 
     colName = ["Date"]
     for key in cons.endPoints.items():
@@ -54,8 +54,8 @@ def PullStart(coinList: list):
     fullFrame = pd.DataFrame(columns=colName.append("Asset"))
 
     # Show Welcome
-    console.print(
-        "Loading [bold magenta]All Coins[/bold magenta] Data. This Might Take A While")
+    logC.info("Loading [bold magenta]All Coins[/bold magenta] Data. This Might Take A While\n",
+              extra={"markup": True})
 
     # Pull Fred RiskFree
     fred = Fred(api_key=cons.FRED_API_KEY)
@@ -84,7 +84,6 @@ def PullStart(coinList: list):
                             TaskProgressColumn(),
                             TimeRemainingColumn(compact=True,
                                                 elapsed_when_finished=True,),
-                            expand=True,
                             transient=True)
 
         with progress:
@@ -114,7 +113,14 @@ def PullStart(coinList: list):
         fullFrame = pd.concat([fullFrame, locals()[dfName]],
                               ignore_index=True)
 
-    console.print('All Frames Merged')
-    console.print('\nALL DATA [bold green]SUCCESSFULLY[/bold green] PULLED!')
+    logC.info("All Frames Merged",
+              extra={"markup": True})
+    logC.info("\nALL DATA [bold green]SUCCESSFULLY[/bold green] PULLED!",
+              extra={"markup": True})
 
     return fullFrame
+
+
+### Test
+if __name__ == "__main__":
+    PullStart(["BTC", "ETH"])
