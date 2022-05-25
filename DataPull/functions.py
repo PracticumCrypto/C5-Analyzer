@@ -14,14 +14,13 @@ def PullData(coin: str,
     Returns:
         data (pd.DataFrame): A DataFrame Contains Date and Feature of One Coin
     """
-
     import requests
 
     # Assemble full request url and get responses:
     reqUrl = cons.rootUrl + cons.endPoints[feature]
     res = requests.get(reqUrl,
                        params={'a': coin,
-                               'api_key': cons.API_KEY,
+                               'api_key': API_KEY,
                                'i': '1w'})
     data_raw = pd.read_json(res.text,
                             convert_dates=['t'])
@@ -34,8 +33,7 @@ def PullData(coin: str,
     return data
 
 
-def PullStart(coinList: list,
-              logC: Logger):
+def PullStart(coinList: list):
     """This Method Gets Features(Listed in "endPoints"(Constant)) of Coins(Listed in "coinList"(Method Parameter))
 
     Args:
@@ -47,6 +45,8 @@ def PullStart(coinList: list,
     # Initialization
     from functools import reduce
     from fredapi import Fred
+    from rich.console import Console
+    console = Console()
 
     colName = ["Date"]
     for key in cons.endPoints.items():
@@ -54,8 +54,8 @@ def PullStart(coinList: list,
     fullFrame = pd.DataFrame(columns=colName.append("Asset"))
 
     # Show Welcome
-    logC.info("Loading [bold magenta]All Coins[/bold magenta] Data. This Might Take A While\n",
-              extra={"markup": True})
+    console.print(
+        "Loading [bold magenta]All Coins[/bold magenta] Data. This Might Take A While")
 
     # Pull Fred RiskFree
     fred = Fred(api_key=cons.FRED_API_KEY)
@@ -84,6 +84,7 @@ def PullStart(coinList: list,
                             TaskProgressColumn(),
                             TimeRemainingColumn(compact=True,
                                                 elapsed_when_finished=True,),
+                            expand=True,
                             transient=True)
 
         with progress:
@@ -113,10 +114,8 @@ def PullStart(coinList: list,
         fullFrame = pd.concat([fullFrame, locals()[dfName]],
                               ignore_index=True)
 
-    logC.info("All Frames Merged",
-              extra={"markup": True})
-    logC.info("\nALL DATA [bold green]SUCCESSFULLY[/bold green] PULLED!",
-              extra={"markup": True})
+    console.print('All Frames Merged')
+    console.print('\nALL DATA [bold green]SUCCESSFULLY[/bold green] PULLED!')
 
     return fullFrame
 
