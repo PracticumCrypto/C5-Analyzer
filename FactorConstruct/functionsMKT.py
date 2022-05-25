@@ -10,19 +10,16 @@ def getMKT(largeCapSample: pd.DataFrame):
     Returns:
         MKT_f (pd.DataFrame): Contains Market Factor
     """
-    marketport = largeCapSample.groupby(
-        'Date')['MarketCap'].sum().reset_index(name='TotalMarketCap')
+    mktport = largeCapSample[largeCapSample['Price'].notna()]
+    marketport = mktport.groupby('Date')['MarketCap'].sum().reset_index(name='TotalMarketCap')
 
-    marketInd = largeCapSample.copy()
+    marketInd = mktport.copy()
     marketInd['weights'] = marketInd['Return'] * marketInd['MarketCap']
-    recomp = marketInd.groupby('Date')['weights'].sum(
-    ).reset_index(name='TotalMarketReturn')
-    marketport['MarketIndexReturn'] = recomp['TotalMarketReturn'] / \
-        marketport['TotalMarketCap']
-
-    riskfree = largeCapSample.groupby('Date')['RiskFree'].mean().reset_index()
+    recomp = marketInd.groupby('Date')['weights'].sum().reset_index(name='TotalMarketReturn')
+    marketport['MarketIndexReturn'] = recomp['TotalMarketReturn']/ marketport['TotalMarketCap']
+    
+    riskfree = mktport.groupby('Date')['RiskFree'].mean().reset_index()
     marketport = marketport.merge(riskfree, on='Date')
-    marketport['MKT'] = marketport['MarketIndexReturn'] - \
-        marketport['RiskFree']
-    MKT_f = marketport[['Date', 'MKT']]
+    marketport['MKT'] = marketport['MarketIndexReturn'] - marketport['RiskFree']
+    MKT_f = marketport[['Date','MKT']]
     return MKT_f

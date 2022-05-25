@@ -99,16 +99,15 @@ else:
 
 # Impute missing value using interploration method
 try:
-    imputedfullSample = DataProcess.processFun.InterpolationImpute(
-        fullSample_raw)
+    validfullSample_raw = DataProcess.processFun.StoppedTrading(fullSample_raw)
 except:
-    logF.exception("Failed Imputing Data. Please Check 'InterpolationImpute' Source Code in 'DataProcess' File\n Or Check Whether You Get 'Raw Full Sample' Properly?")
+    logF.exception("Failed Imputing Data. Please Check 'StoppedTrading' Source Code in 'DataProcess' File\n Or Check Whether You Get 'Raw Full Sample' Properly?")
 else:
     logF.debug("Raw Full Sample Imputed Successfully\n")
 
 # Add Return to fullSample
 try:
-    fullSample = DataProcess.processFun.AddReturn(imputedfullSample)
+    fullSample = DataProcess.processFun.AddReturn(validfullSample_raw)
 except:
     logF.exception(
         "Failed Parsing Data. Please Check 'AddReturn' Source Code in 'DataProcess' File\n Or Check Whether You Get 'Imputed Full Sample' Properly?")
@@ -118,8 +117,7 @@ else:
 # Use (market cap > 1m and top 100) to set up the dynamic portfolio for each week, we would use this dynamic portfolio for our factors calculation.
 try:
     largeCapport = fullSample.query("MarketCap > 1000000")
-    largeCapSample = largeCapport.groupby(['Date']).apply(lambda x: x.nlargest(100,
-                                                                               ['MarketCap'])).reset_index(drop=True)
+    largeCapSample = largeCapport.groupby(['Date']).apply(lambda x: x.nlargest(100,['MarketCap'])).reset_index(drop=True)
 except:
     logF.exception(
         "Failed Parsing Data. Please Check Whether You Get 'Full Sample' Properly?")
@@ -127,6 +125,13 @@ else:
     logF.debug("Large Cap Sample Transformed Successfully\n")
 
 console.rule("[bold red]Factors Construct")
+
+# Output raw data to csv
+latestdate = fullSample_raw.Date.max()
+filename1 = "fullSample_rawdata"+latestdate.strftime("%Y%m%d")+".csv"
+
+fullSample_raw.to_csv(filename1)
+
 # MOM
 try:
     MOM_f = FactorConstruct.MOM.getMomFactor(largeCapSample)
