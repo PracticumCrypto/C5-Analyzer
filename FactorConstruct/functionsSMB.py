@@ -1,5 +1,5 @@
 import pandas as pd
-
+import math
 
 def getSMB(largeCapSample: pd.DataFrame):
     """This Method Returns Size Factor

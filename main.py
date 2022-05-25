@@ -219,6 +219,11 @@ def df_to_table(
     return rich_table
 
 
+latestdate = fullSample_raw.Date.max()
+Alphas['Date'] = latestdate
+filename2 = "alpha_list"+latestdate.strftime("%Y%m%d")+".csv"
+Alphas.to_csv(filename2)
+
 topTable = df_to_table(Alphas.head(10), tableT, show_index=False)
 
 tailTable = df_to_table(Alphas.tail(10), tableB, show_index=False)

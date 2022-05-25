@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 def AddReturn(sample: pd.DataFrame):
     """This Method Add Return Column to Pulled Raw Data
