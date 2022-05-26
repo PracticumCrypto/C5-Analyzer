@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 def AddReturn(sample: pd.DataFrame):
     """This Method Add Return Column to Pulled Raw Data
@@ -10,57 +10,64 @@ def AddReturn(sample: pd.DataFrame):
     Returns:
         fullFrame (pd.DataFrame): DataFrame with a Return Column
     """
-    fullFrame = pd.DataFrame(columns=list(sample.columns).append(['Return',
-                                                                  'week2_return',
-                                                                  'Npast52']))
+    fullFrame = pd.DataFrame(columns=list(sample.columns))
+    
+    ### replace 0 values in active address to 1
+    new = sample.copy()
+    new.drop(['ActiveAddress'], axis = 1)
+    new['ActiveAddress'] = sample['ActiveAddress'].replace({0.0:1.0})
+    
+    ###
+    
     for index in sample['Asset'].unique().tolist():
         syntax = f"Asset == '{index}'"
-        segment = sample.query(syntax)
-        # Only Select 53 Weeks for Test
-#         temp = segment[-53:-1].reset_index().drop('index', axis=1)
-#         segment = segment[-52:].reset_index().drop('index', axis=1)
-        segment = segment.assign(Return=segment.Price.rolling(2).apply(
-            lambda x: (x.iloc[-1]-x.iloc[0])/x.iloc[0]).copy())
-        segment = segment.assign(week2_return=segment.Price.rolling(
-            4).apply(lambda x: (x.iloc[-2]-x.iloc[0])/x.iloc[0]))
-        segment = segment.assign(Npast52_return=segment.Price.rolling(
-            52).apply(lambda x: (x.iloc[-1]-x.iloc[0])/x.iloc[0]))
-        segment = segment[-52:].reset_index(drop=True)
-        fullFrame = pd.concat([fullFrame, segment],
-                              ignore_index=True)
-        fullFrame["ExcessReturn"] = fullFrame["Return"] - fullFrame["RiskFree"]
+        segment = new.query(syntax)
+        segment = segment.assign(Return = segment.Price.rolling(2).apply(lambda x: (x.iloc[-1]-x.iloc[0])/x.iloc[0]).copy())
+        segment = segment.assign(week2_return = segment.Price.rolling(4).apply(lambda x: (x.iloc[-2]-x.iloc[0])/x.iloc[0]))
+        segment = segment.assign(Npast52_return = segment.Price.rolling(53).apply(lambda x: (x.iloc[-2]-x.iloc[0])/x.iloc[0]))
+        segment = segment.assign(GrowthRate = segment.ActiveAddress.rolling(3).apply(lambda x: np.log(x.iloc[-2])-np.log(x.iloc[0])
+                                                                                     if ((x.iloc[0]>0 and x.iloc[-2]>0)) else np.nan ))                                                                                                                                                                                                                                                                                                    
+        segment = segment.assign(lagCap = segment.MarketCap.shift())
+                                 
+        #############remove stable currency ########### 
+        stdvar = segment.Return.std()
+    
+        ##################                         
+        if stdvar > 0.005:
+            segment = segment[-52:].reset_index(drop=True)
+            fullFrame = pd.concat([fullFrame, segment],
+                                         ignore_index=True)
+            fullFrame["ExcessReturn"] = fullFrame["Return"] - fullFrame["RiskFree"]
 
     return fullFrame
 
 
-def InterpolationImpute(sample: pd.DataFrame):
-    """This Method will impute NA values using linear interpolation method
+def StoppedTrading(sample: pd.DataFrame):
+    """This Method will remove crypto currencies stopped trading.
 
     Args:
         sample (pd.DataFrame): The Pulled Data 
 
     Returns:
-        fullFrame (pd.DataFrame): A DataFrame Imputed all NA using linear interpolation
+        fullFrame (pd.DataFrame): A DataFrame with all cryptocurrencies stopped trading removed.
     """
     # Initialization
-    imputedFrame = pd.DataFrame(columns=list(sample.columns))
+    validFrame = pd.DataFrame(columns=list(sample.columns))
 
     orgcols = list(sample.columns)
-    cols = orgcols.copy()
-    cols.remove('Date')
-    cols.remove('Asset')
+    orgcols.remove('RiskFree')
+    
+    
+
     for index in sample['Asset'].unique().tolist():
         syntax = f"Asset == '{index}'"
         segment = sample.query(syntax)
-
-#if the price for the asset is missing for the latest **4 weeks** ,
-#then we consider it as a cryto currency that stopped trading, we won't include it in our sample
-
+         
         if (segment['Price'][-4:].isnull().sum() < 4):
-            temp = segment[cols].interpolate(
+            temp = pd.DataFrame()
+            temp[orgcols] = segment[orgcols]
+            temp['RiskFree'] = segment[['RiskFree']].interpolate(
                 method='linear', limit_direction='forward', axis=0)
-            temp['Asset'] = segment['Asset']
-            temp['Date'] = segment['Date']
-            imputedFrame = pd.concat([imputedFrame, temp[orgcols]],
-                                     ignore_index=True)
-    return imputedFrame
+            validFrame = pd.concat([validFrame, temp], ignore_index=True)
+
+    return validFrame
