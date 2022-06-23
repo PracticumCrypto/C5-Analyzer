@@ -43,7 +43,7 @@ logC.info("[bold magenta]Initializing... Please Be Patient...[/bold magenta]\n",
 
 # Import DataPull
 try:
-    logC.info("Loading [bold magenta]DataPull[/bold magenta] Functions...",
+    logC.info("Loading [bold magenta]DataPull[/bold magenta] Functions...\n",
               extra={"markup": True})
     import DataPull.constants as cons
     import DataPull.functions as pullFuc
