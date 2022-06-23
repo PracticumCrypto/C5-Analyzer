@@ -16,6 +16,6 @@ A Tool for Ranking Cryptos
 
 ### Miscellaneous
 
-- [ ] Add Log Fuction
+- [x] Add Log Fuction
 - [ ] Multithread
 - [ ] API Request Optimize
