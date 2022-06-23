@@ -1,5 +1,7 @@
 *.csv
 *.code-workspace
+*.ico
+*.exe
 # Log
 Log
 
