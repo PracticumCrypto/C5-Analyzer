@@ -88,9 +88,11 @@ else:
 
 ### Init
 # Get Full Sample
+import DataPull.asyncPull as ap
 console.rule("[bold red]Data Pull & Parse")
 try:
-    fullSample_raw = pullFuc.PullStart(cons.symbolList, logC)
+    #fullSample_raw = pullFuc.PullStart(cons.symbolList, logC)
+    fullSample_raw = ap.PullStart()
 except:
     logF.exception(
         "Failed Pulling Data. Please Check Source Code in 'DataPull' File")
