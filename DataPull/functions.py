@@ -115,7 +115,7 @@ def PullStart(coinList: list,
 
     logC.info("All Frames Merged",
               extra={"markup": True})
-    logC.info("\nALL DATA [bold green]SUCCESSFULLY[/bold green] PULLED!",
+    logC.info("ALL DATA [bold green]SUCCESSFULLY[/bold green] PULLED!",
               extra={"markup": True})
 
     return fullFrame
