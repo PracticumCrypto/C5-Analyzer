@@ -37,11 +37,11 @@ async def main(loop):
     
     from fredapi import Fred
     fred = Fred(api_key=cons.FRED_API_KEY)
-    Risk_free_rate = fred.get_series('DGS1MO').to_frame().reset_index().rename(columns={'index': 'Date',
+    risk_free_rate = fred.get_series('DGS1MO').to_frame().reset_index().rename(columns={'index': 'Date',
                                                                                         0: 'RiskFree'})
-    Risk_free_rate['RiskFree'] = Risk_free_rate['RiskFree'] / 100
+    risk_free_rate['RiskFree'] = risk_free_rate['RiskFree'] / 100
     
-    tasks = [loop.create_task(Get(coin, Risk_free_rate)) for coin in cons.symbolList]
+    tasks = [loop.create_task(Get(coin, risk_free_rate)) for coin in cons.symbolList]
     finished, unfinished = await asyncio.wait(tasks)
     all_results = [r.result() for r in finished]    
     return all_results

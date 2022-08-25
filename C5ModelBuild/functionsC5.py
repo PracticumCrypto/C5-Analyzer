@@ -44,7 +44,7 @@ def ModelBuild(fullSample,
         x = reg[features].copy()
         model = LinearRegression()
         model.fit(x, y)
-        y_pred = model.predict(x)
+        # y_pred = model.predict(x)
         alpha = model.intercept_
         performance[index] = alpha
 

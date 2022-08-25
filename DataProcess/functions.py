@@ -54,8 +54,8 @@ def StoppedTrading(sample: pd.DataFrame):
     # Initialization
     validFrame = pd.DataFrame(columns=list(sample.columns))
 
-    orgcols = list(sample.columns)
-    orgcols.remove('RiskFree')
+    originalCols = list(sample.columns)
+    originalCols.remove('RiskFree')
     
     
 
@@ -65,7 +65,7 @@ def StoppedTrading(sample: pd.DataFrame):
          
         if (segment['Price'][-4:].isnull().sum() < 4):
             temp = pd.DataFrame()
-            temp[orgcols] = segment[orgcols]
+            temp[originalCols] = segment[originalCols]
             temp['RiskFree'] = segment[['RiskFree']].interpolate(
                 method='linear', limit_direction='forward', axis=0)
             validFrame = pd.concat([validFrame, temp], ignore_index=True)
